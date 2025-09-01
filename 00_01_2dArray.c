@@ -22,19 +22,16 @@ int main() {
     int row, col, value;
     char choice;
     
-    // Get array dimensions from user
     printf("Enter number of rows: ");
     scanf("%d", &rows);
     printf("Enter number of columns: ");
     scanf("%d", &cols);
     
-    // Validate input
     if (rows <= 0 || cols <= 0) {
         printf("Error: Rows and columns must be positive integers.\n");
         return 1;
     }
     
-    // Allocate memory for 2D array
     arr = (int **)malloc(rows * sizeof(int *));
     if (arr == NULL) {
         printf("Memory allocation failed!\n");
@@ -57,7 +54,6 @@ int main() {
     printf("\n2D Array (%dx%d) initialized with zeros.\n", rows, cols);
     printArray(arr, rows, cols);
     
-    // Allow user to input values
     do {
         printf("Enter row index (0-%d): ", rows-1);
         scanf("%d", &row);
@@ -75,21 +71,18 @@ int main() {
         printf("Enter value to insert: ");
         scanf("%d", &value);
         
-        // Insert value at specified position
         arr[row][col] = value;
         
-        // Display updated array
         printArray(arr, rows, cols);
         
         printf("Do you want to insert another value? (y/n): ");
-        scanf(" %c", &choice); // Space before %c to consume whitespace
+        scanf(" %c", &choice);
         
     } while (choice == 'y' || choice == 'Y');
     
     printf("Final array:\n");
     printArray(arr, rows, cols);
     
-    // Free allocated memory
     for (int i = 0; i < rows; i++) {
         free(arr[i]);
     }

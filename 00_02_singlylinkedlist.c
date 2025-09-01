@@ -14,7 +14,6 @@ struct Node {
 
 struct Node* head = NULL;
 
-// Insert at end
 void insert(int val) {
     struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
     newNode->data = val;
@@ -29,7 +28,6 @@ void insert(int val) {
     temp->next = newNode;
 }
 
-// Delete by value
 void deleteNode(int val) {
     if (head == NULL) {
         printf("List is empty.\n");
@@ -56,7 +54,6 @@ void deleteNode(int val) {
     }
 }
 
-// Search
 void search(int val) {
     struct Node* temp = head;
     int pos = 0;
@@ -71,7 +68,6 @@ void search(int val) {
     printf("Value not found.\n");
 }
 
-// Display
 void display() {
     if (head == NULL) {
         printf("List is empty.\n");
