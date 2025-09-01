@@ -6,7 +6,6 @@ Set1 Q1. Implement a function to convert an infix arithmetic expression involvin
 
 #include <stdio.h>
 #include <ctype.h>
-
 #define MAX 100
 
 char stack[MAX];

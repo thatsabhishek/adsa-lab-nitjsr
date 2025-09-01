@@ -6,8 +6,7 @@ Set1 Q2. Implement a function to read an arithmetic expression (as given in the 
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <math.h>
-
+#include <math.h>s
 #define MAX 100
 
 char stack[MAX];
