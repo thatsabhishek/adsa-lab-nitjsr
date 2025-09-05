@@ -2,146 +2,150 @@
 #include <stdlib.h>
 #define MAX 100
 
-// Queue structure
-struct Queue {
+// Stack structure
+struct Stack {
     int arr[MAX];
-    int front, rear;
+    int top;
 };
 
-// Initialize queue
-void init(struct Queue *q) {
-    q->front = q->rear = -1;
+// Initialize stack
+void init(struct Stack *s) {
+    s->top = -1;
 }
 
 // Check if empty
-int isEmpty(struct Queue *q) {
-    return q->front == -1;
+int isEmpty(struct Stack *s) {
+    return s->top == -1;
 }
 
 // Check if full
-int isFull(struct Queue *q) {
-    return (q->rear + 1) % MAX == q->front;
+int isFull(struct Stack *s) {
+    return s->top == MAX - 1;
 }
 
-// Enqueue
-void enqueue(struct Queue *q, int x) {
-    if (isFull(q)) {
-        printf("Queue Overflow\n");
+// Push element
+void push(struct Stack *s, int x) {
+    if (isFull(s)) {
+        printf("Stack Overflow\n");
         return;
     }
-    if (q->front == -1) q->front = 0;
-    q->rear = (q->rear + 1) % MAX;
-    q->arr[q->rear] = x;
+    s->arr[++s->top] = x;
 }
 
-// Dequeue
-int dequeue(struct Queue *q) {
-    if (isEmpty(q)) {
+// Pop element
+int pop(struct Stack *s) {
+    if (isEmpty(s)) {
+        return -1;  // error
+    }
+    return s->arr[s->top--];
+}
+
+// Peek top element
+int peek(struct Stack *s) {
+    if (isEmpty(s)) return -1;
+    return s->arr[s->top];
+}
+
+
+//    METHOD 1: Queue using two stacks (Push costly)
+struct Queue1 {
+    struct Stack s1, s2;
+};
+
+void initQ1(struct Queue1 *q) {
+    init(&q->s1);
+    init(&q->s2);
+}
+
+// Enqueue costly
+void enqueue1(struct Queue1 *q, int x) {
+    // Move everything from s1 → s2
+    while (!isEmpty(&q->s1)) {
+        push(&q->s2, pop(&q->s1));
+    }
+
+    // Push new element into s1
+    push(&q->s1, x);
+
+    // Move back s2 → s1
+    while (!isEmpty(&q->s2)) {
+        push(&q->s1, pop(&q->s2));
+    }
+    printf("Enqueued %d\n", x);
+}
+
+// Dequeue easy
+int dequeue1(struct Queue1 *q) {
+    if (isEmpty(&q->s1)) {
+        printf("Queue Underflow\n");
         return -1;
     }
-    int x = q->arr[q->front];
-    if (q->front == q->rear) {
-        q->front = q->rear = -1;
-    } else {
-        q->front = (q->front + 1) % MAX;
-    }
-    return x;
+    return pop(&q->s1);
 }
 
-// Display queue contents (front → rear)
-void displayQueue(struct Queue *q) {
-    if (isEmpty(q)) {
-        printf("Stack is empty\n");
+void display1(struct Queue1 *q) {
+    if (isEmpty(&q->s1)) {
+        printf("Queue is empty\n");
         return;
     }
-    int i = q->front;
-    printf("Stack (top -> bottom): ");
-    while (1) {
-        printf("%d ", q->arr[i]);
-        if (i == q->rear) break;
-        i = (i + 1) % MAX;
+    printf("Queue (front → rear): ");
+    for (int i = q->s1.top; i >= 0; i--) {
+        printf("%d ", q->s1.arr[i]);
     }
     printf("\n");
 }
 
-//    METHOD 1: Stack using two queues (Push costly)
-struct Stack1 {
-    struct Queue q1, q2;
+
+//    METHOD 2: Queue using two stacks (Pop costly)
+struct Queue2 {
+    struct Stack s1, s2;
 };
 
-void initS1(struct Stack1 *s) {
-    init(&s->q1);
-    init(&s->q2);
+void initQ2(struct Queue2 *q) {
+    init(&q->s1);
+    init(&q->s2);
 }
 
-void push1(struct Stack1 *s, int x) {
-    // Move all from q1 to q2
-    while (!isEmpty(&s->q1)) {
-        enqueue(&s->q2, dequeue(&s->q1));
-    }
-
-    // Enqueue new element into q1
-    enqueue(&s->q1, x);
-
-    // Move everything back to q1
-    while (!isEmpty(&s->q2)) {
-        enqueue(&s->q1, dequeue(&s->q2));
-    }
-    printf("Pushed %d\n", x);
+// Enqueue easy
+void enqueue2(struct Queue2 *q, int x) {
+    push(&q->s1, x);
+    printf("Enqueued %d\n", x);
 }
 
-int pop1(struct Stack1 *s) {
-    if (isEmpty(&s->q1)) {
-        printf("Stack Underflow\n");
-        return -1;
-    }
-    return dequeue(&s->q1);
-}
-
-void display1(struct Stack1 *s) {
-    displayQueue(&s->q1);
-}
-
-
-//    METHOD 2: Stack using two queues (Pop costly)
-struct Stack2 {
-    struct Queue q1, q2;
-};
-
-void initS2(struct Stack2 *s) {
-    init(&s->q1);
-    init(&s->q2);
-}
-
-void push2(struct Stack2 *s, int x) {
-    enqueue(&s->q1, x);
-    printf("Pushed %d\n", x);
-}
-
-int pop2(struct Stack2 *s) {
-    if (isEmpty(&s->q1)) {
-        printf("Stack Underflow\n");
+// Dequeue costly
+int dequeue2(struct Queue2 *q) {
+    if (isEmpty(&q->s1) && isEmpty(&q->s2)) {
+        printf("Queue Underflow\n");
         return -1;
     }
 
-    // Move all except last from q1 to q2
-    while (s->q1.front != s->q1.rear) {
-        enqueue(&s->q2, dequeue(&s->q1));
+    if (isEmpty(&q->s2)) {
+        while (!isEmpty(&q->s1)) {
+            push(&q->s2, pop(&q->s1));
+        }
     }
 
-    // Last element = top of stack
-    int popped = dequeue(&s->q1);
-
-    // Swap q1 and q2
-    struct Queue temp = s->q1;
-    s->q1 = s->q2;
-    s->q2 = temp;
-
-    return popped;
+    return pop(&q->s2);
 }
 
-void display2(struct Stack2 *s) {
-    displayQueue(&s->q1);
+void display2(struct Queue2 *q) {
+    if (isEmpty(&q->s1) && isEmpty(&q->s2)) {
+        printf("Queue is empty\n");
+        return;
+    }
+    printf("Queue (front → rear): ");
+
+    // Print elements of s2 first (top → bottom)
+    for (int i = 0; i <= q->s2.top; i++) {
+        printf("%d ", q->s2.arr[i]);
+    }
+
+    // Then print elements of s1 (bottom → top)
+    for (int i = q->s1.top; i >= 0; i--) {
+        printf("%d ", q->s1.arr[i]);
+    }
+
+    printf("\n");
 }
 
 //    MAIN MENU
@@ -155,12 +159,12 @@ int main() {
     scanf("%d", &method);
 
     if (method == 1) {
-        struct Stack1 s;
-        initS1(&s);
+        struct Queue1 q;
+        initQ1(&q);
 
         while (1) {
-            printf("\n--- Stack Menu (Push Costly) ---\n");
-            printf("1. Push\n2. Pop\n3. Display\n4. Exit\n");
+            printf("\n--- Queue Menu (Push Costly) ---\n");
+            printf("1. Enqueue\n2. Dequeue\n3. Display\n4. Exit\n");
             printf("Enter choice: ");
             scanf("%d", &choice);
 
@@ -168,14 +172,14 @@ int main() {
             case 1:
                 printf("Enter value: ");
                 scanf("%d", &val);
-                push1(&s, val);
+                enqueue1(&q, val);
                 break;
             case 2:
-                val = pop1(&s);
-                if (val != -1) printf("Popped %d\n", val);
+                val = dequeue1(&q);
+                if (val != -1) printf("Dequeued %d\n", val);
                 break;
             case 3:
-                display1(&s);
+                display1(&q);
                 break;
             case 4:
                 exit(0);
@@ -184,12 +188,12 @@ int main() {
             }
         }
     } else if (method == 2) {
-        struct Stack2 s;
-        initS2(&s);
+        struct Queue2 q;
+        initQ2(&q);
 
         while (1) {
-            printf("\n--- Stack Menu (Pop Costly) ---\n");
-            printf("1. Push\n2. Pop\n3. Display\n4. Exit\n");
+            printf("\n--- Queue Menu (Pop Costly) ---\n");
+            printf("1. Enqueue\n2. Dequeue\n3. Display\n4. Exit\n");
             printf("Enter choice: ");
             scanf("%d", &choice);
 
@@ -197,14 +201,14 @@ int main() {
             case 1:
                 printf("Enter value: ");
                 scanf("%d", &val);
-                push2(&s, val);
+                enqueue2(&q, val);
                 break;
             case 2:
-                val = pop2(&s);
-                if (val != -1) printf("Popped %d\n", val);
+                val = dequeue2(&q);
+                if (val != -1) printf("Dequeued %d\n", val);
                 break;
             case 3:
-                display2(&s);
+                display2(&q);
                 break;
             case 4:
                 exit(0);
